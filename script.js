@@ -24,8 +24,40 @@ const giveUpButton = document.getElementById("give-up-button");
 const winTitle = document.getElementById("win-title");
 const guessPara = document.getElementById("guess-para");
 const themeToggle = document.getElementById("toggle-theme-button");
+const gameOverOverlay = document.getElementById("game-over-overlay");
+const gameOverTitle = document.getElementById("game-over-title");
+const gameOverMessage = document.getElementById("game-over-message");
+const overlayShareButton = document.getElementById("overlay-share-button");
+const playAgainButton = document.getElementById("play-again-button");
 
 // Load Pokemon data
+function handleWin() {
+  gameWon = true;
+  endGame(true);
+}
+
+function endGame(won) {
+  gameOver = true;
+  saveGameState(); // Save game state immediately when game ends
+
+  if (won) {
+    streak++;
+    streakCount.textContent = streak;
+    gameOverTitle.textContent = "Congratulations!";
+    gameOverMessage.textContent = `You guessed today's Pokémon: ${dailyPokemon}`;
+  } else {
+    streak = 0; // Reset streak if player gave up
+    streakCount.textContent = streak;
+    gameOverTitle.textContent = "You gave up!";
+    gameOverMessage.textContent = `The correct Pokémon is ${dailyPokemon}`;
+  }
+
+  answerPokemon.textContent = dailyPokemon; // Update the win message in the main game area
+  winMessage.classList.remove("hidden"); // Show the main win message area
+  gameOverOverlay.classList.remove("hidden"); // Show the overlay
+  saveGameState();
+}
+
 async function loadPokemonData() {
   try {
     const response = await fetch("db.json");
@@ -429,14 +461,14 @@ function renderGuess(pokemonName, comparison) {
 }
 
 // Handle win
-function handleWin() {
-  gameOver = true;
-  streak++;
-  streakCount.textContent = streak;
+// function handleWin() {
+//   gameOver = true;
+//   streak++;
+//   streakCount.textContent = streak;
 
-  answerPokemon.textContent = dailyPokemon;
-  winMessage.classList.remove("hidden");
-}
+//   answerPokemon.textContent = dailyPokemon;
+//   winMessage.classList.remove("hidden");
+// }
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
   isDarkMode = document.body.classList.contains("dark-mode");
@@ -446,26 +478,16 @@ themeToggle.addEventListener("click", () => {
 giveUpButton.addEventListener("click", () => {
   settingsDropdown.classList.toggle("hidden");
   if (gameOver) return;
-  
-  // Reset streak since player gave up
-  streak = 0;
-  streakCount.textContent = streak;
-  
-  // Show the answer
-  gameOver = true;
-  gameWon = false;
-  answerPokemon.textContent = dailyPokemon;
-  winMessage.classList.remove("hidden");
-  
-  // Save game state
-  saveGameState();
 
-  winTitle.textContent = "You gave up!";
-  guessPara.textContent = "The correct Pokémon is " + dailyPokemon;
+  if (confirm("Are you sure you want to give up? Your streak will be reset.")) {
+    endGame(false);
+  }
 });
 
 // Share results
-shareButton.addEventListener("click", () => {
+shareButton.addEventListener("click", () => shareGame());
+
+function shareGame() {
   const guessCount = attempts;
   const date = new Date().toLocaleDateString();
   let shareText;
@@ -510,8 +532,7 @@ shareButton.addEventListener("click", () => {
     .catch((err) => {
       console.error("Failed to copy: ", err);
     });
-});
-
+}
 // Save game state
 function saveGameState() {
   const today = new Date().toDateString();
