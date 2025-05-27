@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USUMdle - Pokémon Guessing Game</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>USUMdle</h1>
+        <p>Guess the Pokémon from Ultra Sun & Ultra Moon!</p>
+        <div class="settings-menu-container">
+          <button id="settings-button" aria-label="Settings">
+            <i class="fas fa-cog"></i> <!-- Using Font Awesome for a gear icon -->
+          </button>
+          <div id="settings-dropdown" class="settings-dropdown hidden">
+            <button id="toggle-theme-button">Dark/Light Mode</button>
+            <button id="give-up-button">Give Up</button>
+            <button id="toggle-mode-button">Daily/Infinite Mode</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="game-container">
+        <div class="search-container">
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Enter a Pokémon name..."
+            />
+            <button id="search-button"><i class="fas fa-search"></i></button>
+          </div>
+          <div id="search-results" class="search-results"></div>
+        </div>
+
+        <div class="guesses-container">
+          <div class="guesses-header">
+            <div class="property">Pokémon</div>
+            <div class="property">Islands</div>
+            <div class="property">Encounter Methods</div>
+            <div class="property">Highest Level</div>
+            <div class="property">Multiple Forms</div>
+            <div class="property">Evolution Trigger</div>
+            <div class="property">Egg Group</div>
+            <div class="property">Types</div>
+            <div class="property">Dex Number</div>
+          </div>
+          <div id="guesses-list" class="guesses-list">
+            <!-- Guesses will be added here -->
+          </div>
+        </div>
+
+        <div class="game-info">
+          <div id="attempts">Attempts: <span id="attempts-count">0</span></div>
+          <div id="streak">Streak: <span id="streak-count">0</span></div>
+          <div id="timer">
+            Next Pokémon: <span id="timer-count">00:00:00</span>
+          </div>
+        </div>
+
+        <div id="win-message" class="win-message hidden">
+          <h2 id="win-title">Congratulations!</h2>
+          <p id="guess-para">You guessed today's Pokémon: <span id="answer-pokemon"></span></p>
+          <button id="share-button">Share Results</button>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h2>How to Play</h2>
+        <p>
+          The goal of this game is to guess a Pokémon from Ultra Sun & Ultra
+          Moon. Every day a new Pokémon is chosen, and by continuing to guess
+          the Pokémon of the day, you can build up a win-streak.
+        </p>
+        <p>
+          Begin by typing the name of any Pokémon in the search field. Based on
+          your search, up to 10 results will pop up. Click on any of these
+          Pokémon, or navigate to them with your arrow keys and press Enter to
+          lock your guess in.
+        </p>
+        <p>
+          The properties of your chosen Pokémon will be compared to today's
+          Pokémon and will be marked:
+        </p>
+        <ul>
+          <li><span class="correct">Green</span> if matching</li>
+          <li><span class="partial">Yellow</span> for partial matches</li>
+          <li><span class="incorrect">Red</span> if incorrect</li>
+        </ul>
+        <p>
+          Behind incorrect number fields you will also find an arrow indicating
+          whether you should guess higher or lower.
+        </p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Created by BananzaMan</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
