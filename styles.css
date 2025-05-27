@@ -282,10 +282,6 @@ body.dark-mode {
   color: #e0e0e0; /* Light text */
 }
 
-body.dark-mode .container {
-  /* No specific change needed for container itself unless you want a different border/shadow */
-}
-
 body.dark-mode header h1 {
   color: #ff6b6b; /* Adjusted primary color for dark mode */
 }

@@ -87,7 +87,7 @@ function selectDailyPokemon() {
   }-${today.getDate()}`;
 
   // Use the date as a seed for random selection
-  const seed = hashCode(dateString+123446);
+  const seed = hashCode(dateString);
   const pokemonNames = Object.keys(pokemonData);
   const dailyIndex = Math.abs(seed) % pokemonNames.length;
 
