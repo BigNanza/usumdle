@@ -189,7 +189,9 @@ header h1 {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 
@@ -399,7 +401,7 @@ body.dark-mode .settings-dropdown button:hover {
   background-color: #3a3a3a;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .guesses-header,
   .guess-item {
     display: block;
@@ -412,7 +414,7 @@ body.dark-mode .settings-dropdown button:hover {
     width: max-content;
     padding: 8px 10px;
   }
-}
+} */
 .game-over-overlay {
   position: fixed;
   top: 0;

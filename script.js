@@ -28,14 +28,19 @@ const gameOverOverlay = document.getElementById("game-over-overlay");
 const gameOverTitle = document.getElementById("game-over-title");
 const gameOverMessage = document.getElementById("game-over-message");
 const overlayShareButton = document.getElementById("overlay-share-button");
-const playAgainButton = document.getElementById("play-again-button");
+const playPracticeButton = document.getElementById("play-practice-button");
 
 // Load Pokemon data
 function handleWin() {
   gameWon = true;
   endGame(true);
 }
-
+gameOverOverlay.addEventListener("click", (event) => {
+  // Check if the click target is the overlay itself, not its children
+  if (event.target === gameOverOverlay) {
+    gameOverOverlay.classList.add("hidden");
+  }
+});
 function endGame(won) {
   gameOver = true;
   saveGameState(); // Save game state immediately when game ends
@@ -87,7 +92,7 @@ function selectDailyPokemon() {
   }-${today.getDate()}`;
 
   // Use the date as a seed for random selection
-  const seed = hashCode(dateString);
+  const seed = hashCode(dateString+123);
   const pokemonNames = Object.keys(pokemonData);
   const dailyIndex = Math.abs(seed) % pokemonNames.length;
 
@@ -404,7 +409,7 @@ function renderGuess(pokemonName, comparison) {
     const direction = document.createElement("span");
     direction.classList.add("direction-indicator");
     direction.textContent =
-      comparison.highestLevel.direction === "up" ? "↑" : "↓";
+      comparison.highestLevel.direction === "up" ? "⬆️" : "⬇️";
     levelElement.appendChild(direction);
   }
   guessItem.appendChild(levelElement);
@@ -451,7 +456,7 @@ function renderGuess(pokemonName, comparison) {
   if (comparison.dexNumber.status === "incorrect") {
     const direction = document.createElement("span");
     direction.classList.add("direction-indicator");
-    direction.textContent = comparison.dexNumber.direction === "up" ? "↑" : "↓";
+    direction.textContent = comparison.dexNumber.direction === "up" ? "⬆️" : "⬇️";
     dexElement.appendChild(direction);
   }
   guessItem.appendChild(dexElement);
@@ -486,6 +491,7 @@ giveUpButton.addEventListener("click", () => {
 
 // Share results
 shareButton.addEventListener("click", () => shareGame());
+overlayShareButton.addEventListener("click", () => shareGame());
 
 function shareGame() {
   const guessCount = attempts;
@@ -513,6 +519,12 @@ function shareGame() {
     properties.forEach(prop => {
       if(prop.classList.contains("correct")) {
         emojiRow += "🟩"; // Green for correct
+      } else if (prop.querySelector(".direction-indicator") !== null) {
+        if (prop.querySelector(".direction-indicator").textContent === "⬆️") {
+          emojiRow += "⬆️";
+        } else {
+          emojiRow += "⬇️";
+        }
       } else if(prop.classList.contains("partial")) {
         emojiRow += "🟨"; // Yellow for partial
       } else if(prop.classList.contains("incorrect")) {
@@ -582,7 +594,7 @@ function loadGameState() {
     if (gameOver) {
       answerPokemon.textContent = dailyPokemon;
       winMessage.classList.remove("hidden");
-      if (!gameWon) {
+      if (!gameState.gameWon) {
         winTitle.textContent = "You gave up!";
         guessPara.textContent = "The correct Pokémon is " + dailyPokemon;
       }
