@@ -1,11 +1,12 @@
 // Global variables
 let pokemonData = {};
-let dailyPokemon = null;
+let pokemon = null;
 let attempts = 0;
 let streak = 0;
 let gameOver = false;
 let gameWon = false;
 let isDarkMode = false;
+let isInfinite = false;
 
 // DOM elements
 const searchInput = document.getElementById("search-input");
@@ -29,6 +30,8 @@ const gameOverTitle = document.getElementById("game-over-title");
 const gameOverMessage = document.getElementById("game-over-message");
 const overlayShareButton = document.getElementById("overlay-share-button");
 const playPracticeButton = document.getElementById("play-practice-button");
+const toggleModeButton = document.getElementById("toggle-mode-button");
+const title = document.getElementById("title");
 
 // Load Pokemon data
 function handleWin() {
@@ -41,26 +44,43 @@ gameOverOverlay.addEventListener("click", (event) => {
     gameOverOverlay.classList.add("hidden");
   }
 });
+playPracticeButton.addEventListener("click", () => {
+  gameOverOverlay.classList.add("hidden");
+  winMessage.classList.add("hidden"); // Show the main win message area
+  if (isInfinite) {
+    localStorage.removeItem("usumdle_infinite_state");
+    toggleInfinite();
+  }
+  toggleInfinite();
+});
+
+toggleModeButton.addEventListener("click", () => toggleInfinite());
+
 function endGame(won) {
   gameOver = true;
-  saveGameState(); // Save game state immediately when game ends
+  saveDailyGameState(); // Save game state immediately when game ends
 
   if (won) {
     streak++;
     streakCount.textContent = streak;
     gameOverTitle.textContent = "Congratulations!";
-    gameOverMessage.textContent = `You guessed today's Pokémon: ${dailyPokemon}`;
+    if (!isInfinite) {
+      gameOverMessage.textContent = `You guessed today's Pokémon: ${pokemon}`;
+    }
+    else {
+      gameOverMessage.textContent = `You guessed the Pokémon: ${pokemon}`;
+    }
   } else {
     streak = 0; // Reset streak if player gave up
     streakCount.textContent = streak;
     gameOverTitle.textContent = "You gave up!";
-    gameOverMessage.textContent = `The correct Pokémon is ${dailyPokemon}`;
+    gameOverMessage.textContent = `The correct Pokémon is ${pokemon}`;
   }
 
-  answerPokemon.textContent = dailyPokemon; // Update the win message in the main game area
+  answerPokemon.textContent = pokemon; // Update the win message in the main game area
   winMessage.classList.remove("hidden"); // Show the main win message area
   gameOverOverlay.classList.remove("hidden"); // Show the overlay
-  saveGameState();
+  saveDailyGameState();
 }
 
 async function loadPokemonData() {
@@ -77,27 +97,53 @@ async function loadPokemonData() {
 
 // Initialize the game
 function initializeGame() {
-  loadGameState();
-  selectDailyPokemon();
+  loadDailyGameState();
+  selectpokemon();
   updateTimer();
   setInterval(updateTimer, 1000);
   renderPreviousGuesses();
 }
 
+function toggleInfinite() {
+  settingsDropdown.classList.toggle("hidden");
+  isInfinite = !isInfinite;
+  if (!isInfinite) {
+    title.innerHTML = "USUMdle";
+    guessesList.innerHTML = '';
+    initializeGame();
+    timerCount.parentElement.classList.remove("hidden");
+  }
+  else {
+    title.innerHTML = "USUMdle - Practice";
+    saveDailyGameState();
+    guessesList.innerHTML = '';
+    loadInfiniteGameState();
+    timerCount.parentElement.classList.add("hidden");
+    //Select new pokemon
+    //Save to local storage
+    //Reset Streak
+  }
+}
+
 // Select the daily Pokemon
-function selectDailyPokemon() {
+function selectpokemon() {
   const today = new Date();
   const dateString = `${today.getFullYear()}-${
     today.getMonth() + 1
   }-${today.getDate()}`;
 
   // Use the date as a seed for random selection
-  const seed = hashCode(dateString+123);
-  const pokemonNames = Object.keys(pokemonData);
-  const dailyIndex = Math.abs(seed) % pokemonNames.length;
-
-  dailyPokemon = pokemonNames[dailyIndex];
-  console.log("Daily Pokemon selected (hidden in production)");
+  if (!isInfinite) {
+    const seed = hashCode(dateString);
+    const pokemonNames = Object.keys(pokemonData);
+    const dailyIndex = Math.abs(seed) % pokemonNames.length;
+    pokemon = pokemonNames[dailyIndex];
+  }
+  else {
+    const pokemonNames = Object.keys(pokemonData);
+    const dailyIndex = Math.floor(Math.random() * pokemonNames.length);
+    pokemon = pokemonNames[dailyIndex];
+  }
 }
 
 // Simple string hash function
@@ -245,7 +291,7 @@ function makeGuess(pokemonName) {
   attemptsCount.textContent = attempts;
 
   const guessedPokemon = pokemonData[pokemonName];
-  const targetPokemon = pokemonData[dailyPokemon];
+  const targetPokemon = pokemonData[pokemon];
 
   const comparison = comparePokemon(guessedPokemon, targetPokemon);
   renderGuess(pokemonName, comparison);
@@ -256,12 +302,13 @@ function makeGuess(pokemonName) {
   searchResults.classList.remove("active");
 
   // Check if the guess is correct
-  if (pokemonName === dailyPokemon) {
+  if (pokemonName === pokemon) {
     handleWin();
   }
 
   // Save game state
-  saveGameState();
+  if (!isInfinite) saveDailyGameState();
+  else saveInfiniteGameState();
 }
 
 // Compare two Pokemon
@@ -471,13 +518,13 @@ function renderGuess(pokemonName, comparison) {
 //   streak++;
 //   streakCount.textContent = streak;
 
-//   answerPokemon.textContent = dailyPokemon;
+//   answerPokemon.textContent = pokemon;
 //   winMessage.classList.remove("hidden");
 // }
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
   isDarkMode = document.body.classList.contains("dark-mode");
-  saveGameState();
+  saveDailyGameState();
 });
 
 giveUpButton.addEventListener("click", () => {
@@ -546,7 +593,24 @@ function shareGame() {
     });
 }
 // Save game state
-function saveGameState() {
+function saveInfiniteGameState() {
+  const guesses = Array.from(guessesList.querySelectorAll(".guess-item")).map(
+    (item) => item.dataset.pokemon
+  );
+
+  const gameState = {
+    pokemon,
+    attempts,
+    streak,
+    gameOver,
+    guesses,
+    gameWon,
+  };
+
+  localStorage.setItem("usumdle_infinite_state", JSON.stringify(gameState));
+}
+
+function saveDailyGameState() {
   const today = new Date().toDateString();
   const guesses = Array.from(guessesList.querySelectorAll(".guess-item")).map(
     (item) => item.dataset.pokemon
@@ -554,7 +618,7 @@ function saveGameState() {
 
   const gameState = {
     date: today,
-    dailyPokemon,
+    pokemon,
     attempts,
     streak,
     gameOver,
@@ -567,7 +631,47 @@ function saveGameState() {
 }
 
 // Load game state
-function loadGameState() {
+function loadInfiniteGameState() {
+  const savedState = localStorage.getItem("usumdle_infinite_state");
+  winMessage.classList.add("hidden");
+  if (!savedState) {
+    // First time playing
+    streak = 0;
+    attempts = 0;
+    attemptsCount.textContent = attempts;
+    streakCount.textContent = streak;
+    gameOver = false;
+    gameWon = false;  
+    winMessage.classList.add("hidden"); // Show the main win message area
+    selectpokemon();
+    return;
+  }
+  const gameState = JSON.parse(savedState);
+  pokemon = gameState.pokemon;
+  attempts = gameState.attempts;
+  streak = gameState.streak;
+  gameOver = gameState.gameOver;
+  
+  //console.log(attempts);
+  
+  attemptsCount.textContent = attempts;
+  streakCount.textContent = streak;
+  gameWon = gameState.gameWon;
+
+  if (gameOver) {
+    endGame(gameWon);
+  }
+
+  gameState.guesses.forEach((pokemonName) => {
+    const guessedPokemon = pokemonData[pokemonName];
+    const targetPokemon = pokemonData[pokemon];
+
+    const comparison = comparePokemon(guessedPokemon, targetPokemon);
+    renderGuess(pokemonName, comparison);
+  });
+}
+
+function loadDailyGameState() {
   const savedState = localStorage.getItem("usumdle_daily_state");
   if (!savedState) {
     // First time playing
@@ -583,7 +687,7 @@ function loadGameState() {
   // Check if saved state is from today
   if (gameState.date === today.toDateString()) {
     // Continue today's game
-    dailyPokemon = gameState.dailyPokemon;
+    pokemon = gameState.pokemon;
     attempts = gameState.attempts;
     streak = gameState.streak;
     gameOver = gameState.gameOver;
@@ -592,11 +696,11 @@ function loadGameState() {
     streakCount.textContent = streak;
 
     if (gameOver) {
-      answerPokemon.textContent = dailyPokemon;
+      answerPokemon.textContent = pokemon;
       winMessage.classList.remove("hidden");
       if (!gameState.gameWon) {
         winTitle.textContent = "You gave up!";
-        guessPara.textContent = "The correct Pokémon is " + dailyPokemon;
+        guessPara.textContent = "The correct Pokémon is " + pokemon;
       }
     }
   } else {
@@ -628,7 +732,7 @@ function renderPreviousGuesses() {
     for (let i = gameState.guesses.length - 1; i >= 0; i--) {
       const pokemonName = gameState.guesses[i];
       const guessedPokemon = pokemonData[pokemonName];
-      const targetPokemon = pokemonData[dailyPokemon];
+      const targetPokemon = pokemonData[pokemon];
 
       const comparison = comparePokemon(guessedPokemon, targetPokemon);
       renderGuess(pokemonName, comparison);

@@ -13,7 +13,7 @@
   <body>
     <div class="container">
       <header>
-        <h1>USUMdle</h1>
+        <h1 id="title">USUMdle</h1>
         <p>Guess the Pokémon from Ultra Sun & Ultra Moon!</p>
         <div class="settings-menu-container">
           <button id="settings-button" aria-label="Settings">
@@ -39,24 +39,24 @@
           </div>
           <div id="search-results" class="search-results"></div>
         </div>
-
-        <div class="guesses-container">
-          <div class="guesses-header">
-            <div class="property">Pokémon</div>
-            <div class="property">Islands</div>
-            <div class="property">Encounter Methods</div>
-            <div class="property">Highest Level</div>
-            <div class="property">Multiple Forms</div>
-            <div class="property">Evolution Trigger</div>
-            <div class="property">Egg Group</div>
-            <div class="property">Types</div>
-            <div class="property">Dex Number</div>
+        <div class="guesses-wrapper">
+          <div class="guesses-container">
+            <div class="guesses-header">
+              <div class="property">Pokémon</div>
+              <div class="property">Islands</div>
+              <div class="property">Encounter Methods</div>
+              <div class="property">Highest Level</div>
+              <div class="property">Multiple Forms</div>
+              <div class="property">Evolution Trigger</div>
+              <div class="property">Egg Group</div>
+              <div class="property">Types</div>
+              <div class="property">Dex Number</div>
+            </div>
+            <div id="guesses-list" class="guesses-list">
+              <!-- Guesses will be added here -->
+            </div>
           </div>
-          <div id="guesses-list" class="guesses-list">
-            <!-- Guesses will be added here -->
-          </div>
-        </div>
-
+      </div>
         <div class="game-info">
           <div id="attempts">Attempts: <span id="attempts-count">0</span></div>
           <div id="streak">Streak: <span id="streak-count">0</span></div>

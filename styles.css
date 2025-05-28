@@ -189,9 +189,7 @@ header h1 {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  text-overflow: ellipsis;
 }
 
 
@@ -401,20 +399,19 @@ body.dark-mode .settings-dropdown button:hover {
   background-color: #3a3a3a;
 }
 
-/* @media (max-width: 768px) {
-  .guesses-header,
-  .guess-item {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+.guesses-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+}
 
-  .property {
-    display: inline-block;
-    width: max-content;
-    padding: 8px 10px;
+@media (max-width: 768px) {
+  .guesses-container {
+    width: 900px; /* Adjust this width as needed to accommodate all columns */
   }
-} */
+}
+#timer.hidden {
+  display: none;
+}
 .game-over-overlay {
   position: fixed;
   top: 0;
