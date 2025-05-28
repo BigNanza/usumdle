@@ -47,11 +47,28 @@ gameOverOverlay.addEventListener("click", (event) => {
 playPracticeButton.addEventListener("click", () => {
   gameOverOverlay.classList.add("hidden");
   winMessage.classList.add("hidden"); // Show the main win message area
+  let themeSet = false;
+  let theme = false;
   if (isInfinite) {
+    const savedState = localStorage.getItem("usumdle_infinite_state");
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      if (state.isDarkMode) {
+        themeSet = true;
+        theme = state.isDarkMode;
+      }
+    }
     localStorage.removeItem("usumdle_infinite_state");
     toggleInfinite();
   }
   toggleInfinite();
+  if (themeSet && theme) {
+    settingsDropdown.classList.toggle("hidden");
+    document.body.classList.toggle("dark-mode");
+    isDarkMode = document.body.classList.contains("dark-mode");
+    if (isInfinite) saveInfiniteGameState();
+    else saveDailyGameState();
+  }
 });
 
 toggleModeButton.addEventListener("click", () => toggleInfinite());
@@ -522,9 +539,11 @@ function renderGuess(pokemonName, comparison) {
 //   winMessage.classList.remove("hidden");
 // }
 themeToggle.addEventListener("click", () => {
+  settingsDropdown.classList.toggle("hidden");
   document.body.classList.toggle("dark-mode");
   isDarkMode = document.body.classList.contains("dark-mode");
-  saveDailyGameState();
+  if (isInfinite) saveInfiniteGameState();
+  else saveDailyGameState();
 });
 
 giveUpButton.addEventListener("click", () => {
@@ -544,15 +563,28 @@ function shareGame() {
   const guessCount = attempts;
   const date = new Date().toLocaleDateString();
   let shareText;
-  if (gameWon===true) {
-    shareText = `USUMdle ${date} - ${guessCount} ${
-      guessCount === 1 ? "guess" : "guesses"
-    }\n`;
+  if (!isInfinite) {
+    if (gameWon===true) {
+      shareText = `USUMdle ${date} - ${guessCount} ${
+        guessCount === 1 ? "guess" : "guesses"
+      }\n`;
+    }
+    else {
+      shareText = `USUMdle ${date}\n`
+    }
+    shareText += gameWon === true ? `I guessed today's Pokémon on https://bignanza.github.io/usumdle` : `I failed to guess today's Pokemon on https://bignanza.github.io/usumdle`;
   }
   else {
-    shareText = `USUMdle ${date}\n`
+    if (gameWon===true) {
+      shareText = `USUMdle - ${guessCount} ${
+        guessCount === 1 ? "guess" : "guesses"
+      }\n`;
+    }
+    else {
+      shareText = `USUMdle ${date}\n`
+    }
+    shareText += gameWon === true ? `I guessed ${pokemon} on https://bignanza.github.io/usumdle in practice` : `I failed to guess ${pokemon} on https://bignanza.github.io/usumdle in practice`;
   }
-  shareText += gameWon === true ? `I guessed today's Pokémon on https://bignanza.github.io/usumdle` : `I failed to guess today's Pokemon on https://bignanza.github.io/usumdle`;
   shareText += `\nCurrent streak: ${streak}`;
 
   const guesses = Array.from(guessesList.querySelectorAll(".guess-item")).map(
@@ -605,6 +637,7 @@ function saveInfiniteGameState() {
     gameOver,
     guesses,
     gameWon,
+    isDarkMode,
   };
 
   localStorage.setItem("usumdle_infinite_state", JSON.stringify(gameState));
@@ -651,6 +684,8 @@ function loadInfiniteGameState() {
   attempts = gameState.attempts;
   streak = gameState.streak;
   gameOver = gameState.gameOver;
+  isDarkMode = gameState.isDarkMode;
+  document.body.classList.toggle("dark-mode", isDarkMode); // Apply dark mode if save
   
   //console.log(attempts);
   
